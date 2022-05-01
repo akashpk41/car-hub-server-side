@@ -49,6 +49,13 @@ async function run() {
       res.send(result);
     });
 
+    // ! send item data by filter email address.
+    app.get("/my-items", async (req, res) => {
+      const email = req.query.email;
+      const result = await carCollection.find({ email }).toArray();
+      res.send(result);
+    });
+
     // ! delete a single item from database .
     app.delete("/manage-inventory/:id", async (req, res) => {
       const id = req.params.id;
@@ -56,6 +63,17 @@ async function run() {
       const result = await carCollection.deleteOne(find);
       res.send(result);
     });
+
+    // ! delete my items data from database .
+    app.delete("/my-items/:id", async (req, res) => {
+      const id = req.params.id;
+      const find = { _id: ObjectId(id) };
+      const result = await carCollection.deleteOne(find);
+      res.send(result);
+    });
+
+
+
   } catch (err) {
     console.log(err);
   }
