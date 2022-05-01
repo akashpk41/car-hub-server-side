@@ -27,6 +27,12 @@ async function run() {
   try {
     await client.connect();
     const carCollection = client.db("carHub").collection("car");
+
+    //     send all data to the client .
+    app.get("/inventory", async (req, res) => {
+      const result = await carCollection.find({}).toArray();
+      res.send(result);
+    });
   } catch (err) {
     console.log(err);
   }
