@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
 
 // ? -------------------- MongoDB -----------------------
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.q4llj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -28,11 +28,29 @@ async function run() {
     await client.connect();
     const carCollection = client.db("carHub").collection("car");
 
-    //     send all data to the client .
+    // ! Create a single item details
+    app.post('/inventory',async (req, res)=>{
+      const newItem = req.body;
+      const result = await carCollection.insertOne(newItem)
+      res.send(result)
+    })
+
+    //!     send all data to the client .
     app.get("/inventory", async (req, res) => {
       const result = await carCollection.find({}).toArray();
       res.send(result);
     });
+
+    //     ! send single data to the client
+    app.get("/inventory/:id", async (req, res) => {
+      const id = req.params.id;
+      const find = { _id: ObjectId(id) };
+      const result = await carCollection.findOne(find);
+      res.send(result);
+    });
+
+
+
   } catch (err) {
     console.log(err);
   }
