@@ -10,6 +10,28 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// ! verify jwt token
+
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).send({ message: "Unauthorize Access " });
+  }
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).send({ message: "Forbidden Access" });
+    }
+    req.decoded = decoded;
+    console.log("decoded: ", decoded);
+  });
+
+  next();
+}
+
+// ! -----------
+
 app.get("/", (req, res) => {
   res.send("Car Hub Server Is Running...");
 });
@@ -60,15 +82,16 @@ async function run() {
     });
 
     // ! send item data by filter email address.
-    app.get("/my-items", async (req, res) => {
+    app.get("/my-items", verifyJWT, async (req, res) => {
       // ! jwt auth code
-      const authHeader = req.headers.authorization;
-
-      console.log(authHeader);
-
+      const decodedEmail = req.decoded.email;
       const email = req.query.email;
-      const result = await carCollection.find({ email }).toArray();
-      res.send(result);
+      if (email === decodedEmail) {
+        const result = await carCollection.find({ email }).toArray();
+        res.send(result);
+      } else {
+        res.status(403).send({ message: "Forbidden Access..." });
+      }
     });
 
     // ! delete a single item from database .
