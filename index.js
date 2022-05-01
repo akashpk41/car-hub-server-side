@@ -29,11 +29,11 @@ async function run() {
     const carCollection = client.db("carHub").collection("car");
 
     // ! Create a single item details
-    app.post('/inventory',async (req, res)=>{
+    app.post("/inventory", async (req, res) => {
       const newItem = req.body;
-      const result = await carCollection.insertOne(newItem)
-      res.send(result)
-    })
+      const result = await carCollection.insertOne(newItem);
+      res.send(result);
+    });
 
     //!     send all data to the client .
     app.get("/inventory", async (req, res) => {
@@ -49,8 +49,13 @@ async function run() {
       res.send(result);
     });
 
-
-
+    // ! delete a single item from database .
+    app.delete("/manage-inventory/:id", async (req, res) => {
+      const id = req.params.id;
+      const find = { _id: ObjectId(id) };
+      const result = await carCollection.deleteOne(find);
+      res.send(result);
+    });
   } catch (err) {
     console.log(err);
   }
