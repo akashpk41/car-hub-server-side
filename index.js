@@ -2,6 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const jwt = require("jsonwebtoken");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -28,6 +29,15 @@ async function run() {
     await client.connect();
     const carCollection = client.db("carHub").collection("car");
 
+    //! secure api with  json web token.
+    app.post("/login", async (req, res) => {
+      const user = req.body;
+      const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1d",
+      });
+      res.send({ accessToken });
+    });
+
     // ! Create a single item details
     app.post("/inventory", async (req, res) => {
       const newItem = req.body;
@@ -51,6 +61,11 @@ async function run() {
 
     // ! send item data by filter email address.
     app.get("/my-items", async (req, res) => {
+      // ! jwt auth code
+      const authHeader = req.headers.authorization;
+
+      console.log(authHeader);
+
       const email = req.query.email;
       const result = await carCollection.find({ email }).toArray();
       res.send(result);
@@ -71,9 +86,6 @@ async function run() {
       const result = await carCollection.deleteOne(find);
       res.send(result);
     });
-
-
-
   } catch (err) {
     console.log(err);
   }
