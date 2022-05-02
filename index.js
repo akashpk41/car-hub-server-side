@@ -109,6 +109,22 @@ async function run() {
       const result = await carCollection.updateOne(filter, updatedDoc, options);
       res.send(result);
     });
+    // ! update : add quantity .
+    app.put("/inventory/:id", async (req, res) => {
+      const id = req.params.id;
+      const prevQuantity = parseInt(req.query.quantity);
+      const newQuantity = parseInt(req.query.newQuantity);
+      console.log(prevQuantity, newQuantity);
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          quantity: parseInt(prevQuantity + newQuantity),
+        },
+      };
+      const result = await carCollection.updateOne(filter, updatedDoc, options);
+      res.send(result);
+    });
 
     // ! delete a single item from database .
     app.delete("/manage-inventory/:id", async (req, res) => {
