@@ -24,7 +24,7 @@ function verifyJWT(req, res, next) {
       return res.status(403).send({ message: "Forbidden Access" });
     }
     req.decoded = decoded;
-    console.log("decoded: ", decoded);
+    // console.log("decoded: ", decoded);
   });
 
   next();
@@ -92,6 +92,22 @@ async function run() {
       } else {
         res.status(403).send({ message: "Forbidden Access..." });
       }
+    });
+
+    // ! update : decrement quantity by one .
+    app.put("/inventory/:id", async (req, res) => {
+      const id = req.params.id;
+      const oldQuantity = parseInt(req.query.oldQuantity);
+      console.log(oldQuantity);
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          quantity: parseInt(oldQuantity - 1),
+        },
+      };
+      const result = await carCollection.updateOne(filter, updatedDoc, options);
+      res.send(result);
     });
 
     // ! delete a single item from database .
